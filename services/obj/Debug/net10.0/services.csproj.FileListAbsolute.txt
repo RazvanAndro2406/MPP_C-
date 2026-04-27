@@ -8,6 +8,7 @@ C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\obj\Debug\net10.0\services.G
 C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\obj\Debug\net10.0\services.AssemblyInfoInputs.cache
 C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\obj\Debug\net10.0\services.AssemblyInfo.cs
 C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\obj\Debug\net10.0\services.csproj.CoreCompileInputs.cache
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\obj\Debug\net10.0\services.sourcelink.json
 C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\obj\Debug\net10.0\services.csproj.Up2Date
 C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\obj\Debug\net10.0\services.dll
 C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\obj\Debug\net10.0\refint\services.dll

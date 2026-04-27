@@ -8,6 +8,7 @@ namespace Ticketing.Networking.Dto
         private string id;
         private string passwd;
 
+        public UserDto() { }
         // Java: public UserDTO(String id)
         public UserDto(string id) : this(id, "")
         {

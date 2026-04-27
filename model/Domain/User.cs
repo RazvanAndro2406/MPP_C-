@@ -9,6 +9,7 @@ namespace Ticketing.Model.Domain
         private string username, passwd, name;
         private ISet<User> friends;
 
+        
         // Constructor 1: Default
         public User() : this("") { }
 

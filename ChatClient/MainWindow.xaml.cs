@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using ChatClient.Gui;
@@ -14,7 +15,6 @@ namespace ChatClient
 
         private IServicesFacade? _servicesFacade;
         private User? _currentUser;
-        // Assuming you have ported the DomainUiEventBus to C# as well
         private readonly DomainUiEventBus _eventBus = new DomainUiEventBus();
 
         public MainWindow()
@@ -34,11 +34,11 @@ namespace ChatClient
         {
             try
             {
-                // In WPF, we simply create the window object
                 ArtistiWindow win = new ArtistiWindow();
                 win.SetServices(_servicesFacade, _eventBus);
                 win.Title = "Gestiune Artisti";
-                win.LoadData();
+                // Note: If LoadData connects to the DB, it should be made async in ArtistiWindow
+                win.LoadData(); 
                 win.Show();
             }
             catch (Exception ex)
@@ -96,24 +96,38 @@ namespace ChatClient
             }
         }
 
-        private void HandleLogout(object sender, RoutedEventArgs e)
+        // REFACTOR 1: Make button handler async
+        private async void HandleLogout(object sender, RoutedEventArgs e)
         {
-            LogoutAndClose();
+            // Prevent multiple clicks while waiting for server
+            this.IsEnabled = false; 
+            await LogoutAsync();
             this.Close();
         }
 
-        public void LogoutAndClose()
+        // REFACTOR 2: Push network operations to a background Task
+        public async Task LogoutAsync()
         {
             if (_servicesFacade == null || _currentUser == null) return;
 
             try
             {
-                _servicesFacade.Logout(_currentUser, this);
+                await Task.Run(() =>
+                {
+                    _servicesFacade.Logout(_currentUser, this);
+                });
             }
             catch (ChatException ex)
             {
                 Logger.Warn("Logout failed", ex);
             }
+        }
+
+        // Kept for backward compatibility if you call it directly from Window_Closing events
+        public void LogoutAndClose()
+        {
+            if (_servicesFacade == null || _currentUser == null) return;
+            try { _servicesFacade.Logout(_currentUser, this); } catch { }
         }
 
         // --- IChatObserver Implementation ---
@@ -130,9 +144,9 @@ namespace ChatClient
         {
             Logger.Debug($"Domain update notification: {entityType}");
 
-            // Java: Platform.runLater
-            // C#: Application.Current.Dispatcher.Invoke
-            Application.Current.Dispatcher.Invoke(() =>
+            // REFACTOR 3: Fire-and-forget UI updates. 
+            // The ReaderThread doesn't wait for this to finish anymore.
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 string type = entityType?.ToUpper() ?? "ALL";
                 
@@ -148,6 +162,7 @@ namespace ChatClient
                         _eventBus.Publish(DomainUiEventBus.EventType.TicketsChanged);
                         break;
                     case "CUMPARATOR_CUMPARA_BILET":
+                    case "SALES":
                         _eventBus.PublishMany(
                             DomainUiEventBus.EventType.TicketSalesChanged,
                             DomainUiEventBus.EventType.SpectaclesChanged
@@ -157,7 +172,7 @@ namespace ChatClient
                         _eventBus.PublishAll(); 
                         break;
                 }
-            });
+            }));
         }
     }
 }

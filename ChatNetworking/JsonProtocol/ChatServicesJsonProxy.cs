@@ -36,7 +36,7 @@ namespace ChatNetworking.JsonProtocol
             _host = host;
             _port = port;
             _qresponses = new BlockingCollection<Response<object>>();
-            _jsonOptions = JsonFactory.Create();
+            _jsonOptions = GsonFactory.Create();
         }
 
         // --- IChatServices Implementation ---
@@ -57,6 +57,7 @@ namespace ChatNetworking.JsonProtocol
                 }
                 if (response.Type == ResponseType.Error)
                 {
+                    Logger.Debug("Error in Login");
                     CloseConnection();
                     throw new ChatException(response.ErrorMessage);
                 }
@@ -636,11 +637,16 @@ namespace ChatNetworking.JsonProtocol
                 try
                 {
                     string? responseLine = _input?.ReadLine();
+                    Logger.Debug("RAW RESPONSE RECEIVED: " + responseLine);
                     if (responseLine == null)
                     {
+                        Logger.Debug("Connection closed by server.");
                         _finished = true;
+                        // Unblock the UI thread if it's waiting for a response
+                        _qresponses.Add(JsonProtocolUtils.CreateErrorResponse<object>("Connection lost")); 
                         break;
                     }
+                    
                     var response = JsonSerializer.Deserialize<Response<object>>(responseLine, _jsonOptions);
                     if (response == null) continue;
 

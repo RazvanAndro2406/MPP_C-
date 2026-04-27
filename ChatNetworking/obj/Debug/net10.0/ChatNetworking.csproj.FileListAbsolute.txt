@@ -10,6 +10,7 @@ C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\ChatNetworking\obj\Debug\net10.0\Chat
 C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\ChatNetworking\obj\Debug\net10.0\ChatNetworking.AssemblyInfoInputs.cache
 C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\ChatNetworking\obj\Debug\net10.0\ChatNetworking.AssemblyInfo.cs
 C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\ChatNetworking\obj\Debug\net10.0\ChatNetworking.csproj.CoreCompileInputs.cache
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\ChatNetworking\obj\Debug\net10.0\ChatNetworking.sourcelink.json
 C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\ChatNetworking\obj\Debug\net10.0\ChatNetw.DA8D9637.Up2Date
 C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\ChatNetworking\obj\Debug\net10.0\ChatNetworking.dll
 C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\ChatNetworking\obj\Debug\net10.0\refint\ChatNetworking.dll

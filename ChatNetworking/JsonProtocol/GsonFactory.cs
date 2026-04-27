@@ -5,7 +5,7 @@ using System.Globalization;
 
 namespace ChatNetworking.JsonProtocol
 {
-    public static class JsonFactory
+    public static class GsonFactory
     {
         // Java: private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         // In C#, ISO 8601 is the default, but we'll specify the format for 1:1 parity.
@@ -25,7 +25,7 @@ namespace ChatNetworking.JsonProtocol
 
             // Java: .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             options.Converters.Add(new DateTimeConverter());
-
+            options.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
             return options;
         }
 

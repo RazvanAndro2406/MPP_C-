@@ -9,6 +9,7 @@ namespace Ticketing.Networking.Dto
         public string ReceiverId { get; set; }
         public string Text { get; set; }
 
+        public MessageDto() { }
         public MessageDto(string senderId, string text, string receiverId)
         {
             SenderId = senderId;

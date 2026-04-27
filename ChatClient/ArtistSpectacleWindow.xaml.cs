@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Windows;
 using Ticketing.Model.Domain;
 using Ticketing.Services;
@@ -18,6 +19,9 @@ namespace ChatClient
         {
             InitializeComponent();
             ComboSpectacle.ItemsSource = _spectacleList;
+            
+            // Clean up subscriptions automatically when the window closes
+            this.Closed += (s, e) => _eventBus?.Unsubscribe(this);
         }
 
         public void SetServices(IServicesFacade servicesFacade, DomainUiEventBus eventBus)
@@ -34,28 +38,44 @@ namespace ChatClient
             LabelArtist.Text = $"Artist selectat: {artist.Name}";
         }
 
-        private void LoadSpectacles()
+        public void LoadSpectacles()
+        {
+            _ = LoadSpectaclesAsync();
+        }
+
+        // REFACTOR: Network call moved to a background Task
+        private async Task LoadSpectaclesAsync()
         {
             if (_servicesFacade == null) return;
 
-            var spectacles = _servicesFacade.GetAllSpectacles();
-            _spectacleList.Clear();
-            foreach (var s in spectacles)
+            try
             {
-                _spectacleList.Add(s);
+                var spectacles = await Task.Run(() => _servicesFacade.GetAllSpectacles());
+                
+                _spectacleList.Clear();
+                foreach (var s in spectacles)
+                {
+                    _spectacleList.Add(s);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Eroare la incarcarea spectacolelor: " + ex.Message);
             }
         }
 
+        // REFACTOR: Deadlock prevention on inbound server messages
         public void OnDomainEvent(DomainUiEventBus.EventType type)
         {
             if (type == DomainUiEventBus.EventType.SpectaclesChanged)
             {
-                // Equivalent to Platform.runLater
-                Dispatcher.Invoke(LoadSpectacles);
+                // Fire and forget 
+                Dispatcher.BeginInvoke(new Action(async () => await LoadSpectaclesAsync()));
             }
         }
 
-        private void HandleSalveaza(object sender, RoutedEventArgs e)
+        // REFACTOR: Async Save
+        private async void HandleSalveaza(object sender, RoutedEventArgs e)
         {
             var selectedSpectacle = ComboSpectacle.SelectedItem as Spectacle;
 
@@ -65,23 +85,31 @@ namespace ChatClient
                 return;
             }
 
+            // Extract IDs on the UI thread before jumping to the background Task
+            long artistId = _selectedArtist.Id;
+            long spectacleId = selectedSpectacle.Id;
+
+            this.IsEnabled = false;
+
             try
             {
-                _servicesFacade?.AddArtistSpectacle(_selectedArtist.Id, selectedSpectacle.Id);
+                await Task.Run(() =>
+                {
+                    _servicesFacade?.AddArtistSpectacle(artistId, spectacleId);
+                });
                 
-                _eventBus?.Publish(DomainUiEventBus.EventType.ArtistSpectaclesChanged);
-                
-                this.Close(); // Close the window
+                // Note: No manual EventBus Publish here! Server sends DomainDataChanged.
+                this.Close(); // Success! Close the popup.
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Operatie esuata");
+                this.IsEnabled = true; // Only re-enable the UI if we failed and the window stays open
             }
         }
 
         private void HandleAnuleaza(object sender, RoutedEventArgs e)
         {
-            _eventBus?.Unsubscribe(this);
             this.Close();
         }
     }

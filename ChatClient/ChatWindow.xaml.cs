@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Windows;
 using log4net;
 using Ticketing.Model.Domain;
@@ -34,14 +35,21 @@ namespace ChatClient
             _user = user;
         }
 
-        // Logic to load friends currently online
+        // Kept for backward compatibility if called synchronously elsewhere
         public void SetLoggedFriends()
         {
+            _ = SetLoggedFriendsAsync();
+        }
+
+        // REFACTOR: Load online friends in the background
+        public async Task SetLoggedFriendsAsync()
+        {
+            if (_server == null || _user == null) return;
+
             try
             {
-                if (_server == null || _user == null) return;
-
-                User[] loggedFriends = _server.GetLoggedFriends(_user);
+                var loggedFriends = await Task.Run(() => _server.GetLoggedFriends(_user));
+                
                 _friendsList.Clear();
                 foreach (User u in loggedFriends)
                 {
@@ -53,13 +61,14 @@ namespace ChatClient
                     FriendsTable.SelectedIndex = 0;
                 }
             }
-            catch (ChatException e)
+            catch (Exception e)
             {
                 Logger.Error("Failed to load logged friends", e);
             }
         }
 
-        private void HandleSendMessage(object sender, RoutedEventArgs e)
+        // REFACTOR: Async message sending
+        private async void HandleSendMessage(object sender, RoutedEventArgs e)
         {
             int index = FriendsTable.SelectedIndex;
             if (index < 0)
@@ -75,46 +84,59 @@ namespace ChatClient
                 return;
             }
 
+            // Extract receiver on UI thread before jumping to Task
+            User receiver = _friendsList[index];
+            
+            // Prevent user from spamming the send button
+            this.IsEnabled = false;
+
             try
             {
-                SendMessage(index, msg);
+                await SendMessageAsync(receiver, msg);
+                
                 RcvMsgTxt.AppendText($"[me]: {msg}\n");
+                RcvMsgTxt.ScrollToEnd();
                 MsgTxt.Clear();
             }
-            catch (ChatException ex)
+            catch (Exception ex)
             {
-                MessageBox.Show("Your server probably closed connection", "Communication error");
+                MessageBox.Show("Your server probably closed connection: " + ex.Message, "Communication error");
                 Logger.Error("Send message error", ex);
+            }
+            finally
+            {
+                this.IsEnabled = true;
             }
         }
 
-        private void SendMessage(int indexFriend, string txtMsg)
+        private async Task SendMessageAsync(User receiver, string txtMsg)
         {
             if (_user == null) return;
             
             User sender = new User(_user.Id);
-            User receiver = _friendsList[indexFriend];
             Message message = new Message(sender, txtMsg, receiver);
             
-            _server?.SendMessage(message);
+            await Task.Run(() => _server?.SendMessage(message));
         }
 
-        private void HandleLogout(object sender, RoutedEventArgs e)
+        // REFACTOR: Async Logout
+        private async void HandleLogout(object sender, RoutedEventArgs e)
         {
-            Logout();
+            this.IsEnabled = false;
+            await LogoutAsync();
             this.Close(); // Or this.Hide() depending on your navigation logic
         }
 
-        private void Logout()
+        private async Task LogoutAsync()
         {
             try
             {
                 if (_user != null)
                 {
-                    _server?.Logout(_user, this);
+                    await Task.Run(() => _server?.Logout(_user, this));
                 }
             }
-            catch (ChatException e)
+            catch (Exception e)
             {
                 Logger.Error("Logout error " + e);
             }
@@ -122,39 +144,48 @@ namespace ChatClient
 
         // --- IChatObserver Implementation ---
 
+        // REFACTOR: Prevent deadlocks from rapid-fire incoming messages
         public void MessageReceived(Message message)
         {
-            // Java: Platform.runLater
-            Dispatcher.Invoke(() => 
+            Dispatcher.BeginInvoke(new Action(() => 
             {
                 RcvMsgTxt.AppendText($"{message.Sender.Id}: {message.Text}\n");
                 RcvMsgTxt.ScrollToEnd(); // Auto-scroll to latest message
-            });
+            }));
         }
 
+        // REFACTOR: Prevent deadlocks on login notifications
         public void FriendLoggedIn(User friend)
         {
-            Dispatcher.Invoke(() =>
+            Dispatcher.BeginInvoke(new Action(() =>
             {
-                _friendsList.Add(friend);
-                Logger.Debug($"Friend logged in: {friend.Id}");
-            });
+                // Prevent duplicates just in case
+                bool exists = false;
+                foreach(var f in _friendsList) { if (f.Id == friend.Id) exists = true; }
+                
+                if (!exists) 
+                {
+                    _friendsList.Add(friend);
+                    Logger.Debug($"Friend logged in: {friend.Id}");
+                }
+            }));
         }
 
+        // REFACTOR: Prevent deadlocks on logout notifications
         public void FriendLoggedOut(User friend)
         {
-            Dispatcher.Invoke(() =>
+            Dispatcher.BeginInvoke(new Action(() =>
             {
-                // In C#, we usually search by ID to find the object in the collection to remove
                 for (int i = 0; i < _friendsList.Count; i++)
                 {
                     if (_friendsList[i].Id == friend.Id)
                     {
                         _friendsList.RemoveAt(i);
+                        Logger.Debug($"Friend logged out: {friend.Id}");
                         break;
                     }
                 }
-            });
+            }));
         }
 
         public void DomainDataChanged(string entityType)

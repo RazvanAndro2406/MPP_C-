@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using log4net;
@@ -55,21 +55,48 @@ namespace ChatClient
             _eventBus.Subscribe(this);
         }
 
+        // To maintain compatibility with MainWindow calling win.LoadData()
         public void LoadData()
+        {
+            _ = LoadDataAsync();
+        }
+
+        // REFACTOR: Heavy network loop moved to background Task
+        public async Task LoadDataAsync()
         {
             if (_servicesFacade == null) return;
 
-            var spectacles = _servicesFacade.GetAllSpectacles();
-            _spectacleList.Clear();
-
-            foreach (var s in spectacles)
+            try
             {
-                int sold = _servicesFacade.GetSoldSeatsForSpectacle(s.Id);
-                _spectacleList.Add(new SpectacleViewItem(s, sold));
+                // Fetch all data on a background thread so UI doesn't freeze
+                var backgroundList = await Task.Run(() =>
+                {
+                    var spectacles = _servicesFacade.GetAllSpectacles();
+                    var results = new List<SpectacleViewItem>();
+
+                    foreach (var s in spectacles)
+                    {
+                        int sold = _servicesFacade.GetSoldSeatsForSpectacle(s.Id);
+                        results.Add(new SpectacleViewItem(s, sold));
+                    }
+                    return results;
+                });
+
+                // Update UI Collection back on the main thread
+                _spectacleList.Clear();
+                foreach (var item in backgroundList)
+                {
+                    _spectacleList.Add(item);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Eroare la incarcarea spectacolelor", ex);
             }
         }
 
-        private void HandleAdauga(object sender, RoutedEventArgs e)
+        // REFACTOR: Async Add/Update
+        private async void HandleAdauga(object sender, RoutedEventArgs e)
         {
             string titlu = TextFieldTitlu.Text?.Trim() ?? "";
             string locatie = TextFieldLocatie.Text?.Trim() ?? "";
@@ -80,32 +107,49 @@ namespace ChatClient
                 return;
             }
 
+            // Extract values on UI thread before Task.Run
             DateTime data = DatePickerData.SelectedDate.Value.Add(DateTime.Now.TimeOfDay);
             int durata = int.Parse(TextDurata.Text);
             int capacitate = int.Parse(TextCapacitate.Text);
+            long? idToUpdate = _selectedSpectacle?.Id;
 
-            if (_selectedSpectacle != null)
+            // Disable buttons to prevent spam clicks
+            this.IsEnabled = false;
+
+            try
             {
-                _selectedSpectacle.Name = titlu;
-                _selectedSpectacle.Start_date = data;
-                _selectedSpectacle.Duration = durata;
-                _selectedSpectacle.Capacity = capacitate;
-                _selectedSpectacle.Location = locatie;
-                _servicesFacade?.UpdateSpectacle(_selectedSpectacle);
+                await Task.Run(() =>
+                {
+                    if (idToUpdate.HasValue)
+                    {
+                        // Create a clean entity to send to the server (thread-safe)
+                        Spectacle specToUpdate = new Spectacle(titlu, data, durata, capacitate, locatie) { Id = idToUpdate.Value };
+                        _servicesFacade?.UpdateSpectacle(specToUpdate);
+                    }
+                    else
+                    {
+                        _servicesFacade?.AddSpectacle(titlu, data, durata, capacitate, locatie);
+                    }
+                });
+
+                ClearFields();
                 _selectedSpectacle = null;
+                
+                // NOTE: We don't call LoadData() or EventBus.Publish() here anymore! 
+                // The Server will send DomainDataChanged, which triggers OnDomainEvent below.
             }
-            else
+            catch (Exception ex)
             {
-                _servicesFacade?.AddSpectacle(titlu, data, durata, capacitate, locatie);
+                MessageBox.Show("Eroare la retea: " + ex.Message, "Eroare");
             }
-
-            ClearFields();
-            LoadData();
-            _eventBus?.PublishMany(DomainUiEventBus.EventType.SpectaclesChanged, 
-                                   DomainUiEventBus.EventType.TicketsChanged);
+            finally
+            {
+                this.IsEnabled = true;
+            }
         }
 
-        private void HandleVindeBilete(object sender, RoutedEventArgs e)
+        // REFACTOR: Async Sell Tickets
+        private async void HandleVindeBilete(object sender, RoutedEventArgs e)
         {
             if (_selectedSpectacle == null) {
                 MessageBox.Show("Selectați un spectacol din tabel.", "Selecție lipsă");
@@ -118,14 +162,51 @@ namespace ChatClient
                 return;
             }
 
+            long specId = _selectedSpectacle.Id;
+            this.IsEnabled = false;
+
             try {
-                _servicesFacade?.SellTicket(_selectedSpectacle.Id, email, seats);
+                await Task.Run(() => 
+                {
+                    _servicesFacade?.SellTicket(specId, email, seats);
+                });
+                
                 MessageBox.Show($"Bilete vandute cu succes catre: {email}", "Succes");
-                LoadData();
-                _eventBus?.PublishMany(DomainUiEventBus.EventType.TicketSalesChanged, DomainUiEventBus.EventType.SpectaclesChanged);
+                TextFieldBuyerEmail.Clear();
+                TextLocuriVanzare.Clear();
             }
             catch (Exception ex) {
                 MessageBox.Show(ex.Message, "Eroare vanzare");
+            }
+            finally {
+                this.IsEnabled = true;
+            }
+        }
+
+        // REFACTOR: Async Delete
+        private async void HandleSterge(object sender, RoutedEventArgs e)
+        {
+            if (_selectedSpectacle == null) return;
+
+            long specId = _selectedSpectacle.Id;
+            this.IsEnabled = false;
+
+            try
+            {
+                await Task.Run(() => 
+                {
+                    _servicesFacade?.DeleteSpectacle(specId);
+                });
+                ClearFields();
+                _selectedSpectacle = null;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Eroare stergere: " + ex.Message);
+            }
+            finally
+            {
+                this.IsEnabled = true;
             }
         }
 
@@ -143,27 +224,21 @@ namespace ChatClient
             }
         }
 
-        private void HandleSterge(object sender, RoutedEventArgs e)
-        {
-            if (_selectedSpectacle != null)
-            {
-                _servicesFacade?.DeleteSpectacle(_selectedSpectacle.Id);
-                LoadData();
-                _eventBus?.Publish(DomainUiEventBus.EventType.SpectaclesChanged);
-            }
-        }
-
         private void ClearFields() {
             TextFieldTitlu.Clear();
             TextFieldLocatie.Clear();
+            TextDurata.Clear();
+            TextCapacitate.Clear();
             DatePickerData.SelectedDate = null;
         }
 
+        // REFACTOR: Prevent deadlocks on inbound network notifications
         public void OnDomainEvent(DomainUiEventBus.EventType type)
         {
             if (type == DomainUiEventBus.EventType.SpectaclesChanged || type == DomainUiEventBus.EventType.TicketSalesChanged)
             {
-                Dispatcher.Invoke(LoadData);
+                // Fire and forget - lets the Reader Thread go right back to work!
+                Dispatcher.BeginInvoke(new Action(async () => await LoadDataAsync()));
             }
         }
     }

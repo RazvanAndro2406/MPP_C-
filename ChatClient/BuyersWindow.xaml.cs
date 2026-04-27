@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using log4net;
@@ -37,20 +38,33 @@ namespace ChatClient.Gui
             _eventBus.Subscribe(this);
         }
 
+        // Kept for backward compatibility
         public void LoadData()
+        {
+            _ = LoadDataAsync();
+        }
+
+        // REFACTOR: Network call moved to a background Task
+        public async Task LoadDataAsync()
         {
             if (_servicesFacade == null) return;
 
             try
             {
-                var buyers = _servicesFacade.GetAllBuyers();
+                // Fetch from server in background
+                var buyers = await Task.Run(() => _servicesFacade.GetAllBuyers());
+                
+                // Store ID on UI thread to re-select after clear
+                long? selectedId = _selectedBuyer?.Id;
+
+                // Update Collection on UI thread
                 _buyerList.Clear();
                 foreach (var b in buyers) _buyerList.Add(b);
 
-                // Re-select the buyer if they still exist (prevents losing selection on update)
-                if (_selectedBuyer != null)
+                // Re-select the buyer if they still exist
+                if (selectedId.HasValue)
                 {
-                    var matched = _buyerList.FirstOrDefault(b => b.Id == _selectedBuyer.Id);
+                    var matched = _buyerList.FirstOrDefault(b => b.Id == selectedId.Value);
                     TableBuyers.SelectedItem = matched;
                 }
             }
@@ -61,7 +75,8 @@ namespace ChatClient.Gui
             }
         }
 
-        private void LoadSalesForSelectedBuyer()
+        // REFACTOR: Network call moved to a background Task
+        private async Task LoadSalesForSelectedBuyerAsync()
         {
             if (_selectedBuyer == null || _servicesFacade == null)
             {
@@ -69,12 +84,23 @@ namespace ChatClient.Gui
                 return;
             }
 
-            var sales = _servicesFacade.GetTicketSalesByBuyer(_selectedBuyer.Id);
-            _salesList.Clear();
-            foreach (var sale in sales) _salesList.Add(sale);
+            long buyerId = _selectedBuyer.Id;
+
+            try
+            {
+                var sales = await Task.Run(() => _servicesFacade.GetTicketSalesByBuyer(buyerId));
+                
+                _salesList.Clear();
+                foreach (var sale in sales) _salesList.Add(sale);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Failed to load sales for buyer", ex);
+            }
         }
 
-        private void HandleAddBuyer(object sender, RoutedEventArgs e)
+        // REFACTOR: Async Add
+        private async void HandleAddBuyer(object sender, RoutedEventArgs e)
         {
             string name = TextFieldName.Text?.Trim() ?? "";
             if (string.IsNullOrWhiteSpace(name))
@@ -83,43 +109,63 @@ namespace ChatClient.Gui
                 return;
             }
 
+            this.IsEnabled = false;
+
             try
             {
-                _servicesFacade?.GetOrCreateBuyer(null, name); // null email for generic manual add
+                await Task.Run(() => 
+                {
+                    _servicesFacade?.GetOrCreateBuyer("", name); // Use empty string for email if missing
+                });
+                
                 TextFieldName.Clear();
                 _selectedBuyer = null;
-                LoadData();
-                _eventBus?.Publish(DomainUiEventBus.EventType.BuyersChanged);
+                // No manual LoadData() or Publish() here - Server handles DomainDataChanged
             }
             catch (Exception ex)
             {
                 Logger.Error("Failed to add buyer", ex);
-                MessageBox.Show("Eroare adaugare", "Error");
+                MessageBox.Show("Eroare adaugare: " + ex.Message, "Error");
+            }
+            finally
+            {
+                this.IsEnabled = true;
             }
         }
 
-        private void HandleDeleteBuyer(object sender, RoutedEventArgs e)
+        // REFACTOR: Async Delete
+        private async void HandleDeleteBuyer(object sender, RoutedEventArgs e)
         {
             if (_selectedBuyer == null) return;
 
+            long buyerId = _selectedBuyer.Id;
+            this.IsEnabled = false;
+
             try
             {
-                _servicesFacade?.DeleteBuyer(_selectedBuyer.Id);
+                await Task.Run(() => 
+                {
+                    _servicesFacade?.DeleteBuyer(buyerId);
+                });
+                
                 _selectedBuyer = null;
                 _selectedSale = null;
                 TextFieldName.Clear();
                 _salesList.Clear();
-                LoadData();
-                _eventBus?.Publish(DomainUiEventBus.EventType.BuyersChanged);
             }
             catch (Exception ex)
             {
                 Logger.Error("Failed to delete buyer", ex);
-                MessageBox.Show("Eroare stergere", "Error");
+                MessageBox.Show("Eroare stergere: " + ex.Message, "Error");
+            }
+            finally
+            {
+                this.IsEnabled = true;
             }
         }
 
-        private void HandleIncreaseSeats(object sender, RoutedEventArgs e)
+        // REFACTOR: Async Update
+        private async void HandleIncreaseSeats(object sender, RoutedEventArgs e)
         {
             if (_selectedSale == null)
             {
@@ -133,17 +179,26 @@ namespace ChatClient.Gui
                 return;
             }
 
+            long saleId = _selectedSale.Id;
+            this.IsEnabled = false;
+
             try
             {
-                _servicesFacade?.IncreaseTicketSeats(_selectedSale.Id, extraSeats);
-                LoadSalesForSelectedBuyer();
-                _eventBus?.PublishMany(DomainUiEventBus.EventType.TicketSalesChanged, 
-                                       DomainUiEventBus.EventType.SpectaclesChanged);
+                await Task.Run(() => 
+                {
+                    _servicesFacade?.IncreaseTicketSeats(saleId, extraSeats);
+                });
+                
+                TextExtraSeats.Clear();
             }
             catch (Exception ex)
             {
                 Logger.Error("Failed to increase seats", ex);
-                MessageBox.Show("Eroare actualizare", "Error");
+                MessageBox.Show("Eroare actualizare: " + ex.Message, "Error");
+            }
+            finally
+            {
+                this.IsEnabled = true;
             }
         }
 
@@ -153,7 +208,7 @@ namespace ChatClient.Gui
             if (_selectedBuyer != null)
             {
                 TextFieldName.Text = _selectedBuyer.Name;
-                LoadSalesForSelectedBuyer();
+                _ = LoadSalesForSelectedBuyerAsync(); // Async fire-and-forget
             }
             else
             {
@@ -167,21 +222,21 @@ namespace ChatClient.Gui
             _selectedSale = TableSales.SelectedItem as TicketSale;
         }
 
+        // REFACTOR: Deadlock prevention on inbound server messages
         public void OnDomainEvent(DomainUiEventBus.EventType type)
         {
-            // Use Dispatcher to ensure UI updates happen on the main thread
-            Dispatcher.Invoke(() =>
+            Dispatcher.BeginInvoke(new Action(async () =>
             {
                 if (type == DomainUiEventBus.EventType.BuyersChanged)
                 {
-                    LoadData();
+                    await LoadDataAsync();
                 }
                 else if (type == DomainUiEventBus.EventType.TicketSalesChanged || 
                          type == DomainUiEventBus.EventType.SpectaclesChanged)
                 {
-                    LoadSalesForSelectedBuyer();
+                    await LoadSalesForSelectedBuyerAsync();
                 }
-            });
+            }));
         }
     }
 }
