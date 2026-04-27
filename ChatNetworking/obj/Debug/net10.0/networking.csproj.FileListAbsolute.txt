@@ -1,0 +1,17 @@
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\networking\bin\Debug\net10.0\networking.deps.json
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\networking\bin\Debug\net10.0\networking.dll
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\networking\bin\Debug\net10.0\networking.pdb
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\networking\bin\Debug\net10.0\model.dll
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\networking\bin\Debug\net10.0\services.dll
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\networking\bin\Debug\net10.0\model.pdb
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\networking\bin\Debug\net10.0\services.pdb
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\networking\obj\Debug\net10.0\networking.csproj.AssemblyReference.cache
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\networking\obj\Debug\net10.0\networking.GeneratedMSBuildEditorConfig.editorconfig
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\networking\obj\Debug\net10.0\networking.AssemblyInfoInputs.cache
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\networking\obj\Debug\net10.0\networking.AssemblyInfo.cs
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\networking\obj\Debug\net10.0\networking.csproj.CoreCompileInputs.cache
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\networking\obj\Debug\net10.0\networking.csproj.Up2Date
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\networking\obj\Debug\net10.0\networking.dll
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\networking\obj\Debug\net10.0\refint\networking.dll
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\networking\obj\Debug\net10.0\networking.pdb
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\networking\obj\Debug\net10.0\ref\networking.dll

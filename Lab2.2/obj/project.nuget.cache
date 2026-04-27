@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "dgSpecHash": "NjL/nuZnOw0=",
+  "success": true,
+  "projectFilePath": "C:\\Facultate\\Anul_2\\Semestru_2\\MPP\\C#\\Lab2\\Lab2.2\\Lab2.2.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\razva\\.nuget\\packages\\log4net\\2.0.17\\log4net.2.0.17.nupkg.sha512",
+    "C:\\Users\\razva\\.nuget\\packages\\system.configuration.configurationmanager\\4.5.0\\system.configuration.configurationmanager.4.5.0.nupkg.sha512",
+    "C:\\Users\\razva\\.nuget\\packages\\system.security.cryptography.protecteddata\\4.5.0\\system.security.cryptography.protecteddata.4.5.0.nupkg.sha512",
+    "C:\\Users\\razva\\.nuget\\packages\\system.security.permissions\\4.5.0\\system.security.permissions.4.5.0.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1902",
+      "level": "Warning",
+      "message": "Package 'log4net' 2.0.17 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-4f7c-pmjv-c25w",
+      "projectPath": "C:\\Facultate\\Anul_2\\Semestru_2\\MPP\\C#\\Lab2\\Lab2.2\\Lab2.2.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Facultate\\Anul_2\\Semestru_2\\MPP\\C#\\Lab2\\Lab2.2\\Lab2.2.csproj",
+      "libraryId": "log4net",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
+}

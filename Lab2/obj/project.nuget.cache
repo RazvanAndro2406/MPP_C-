@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "dgSpecHash": "JTohxi4SoRw=",
+  "success": true,
+  "projectFilePath": "C:\\Facultate\\Anul_2\\Semestru_2\\MPP\\C#\\Lab2\\Lab2\\Lab2.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\razva\\.nuget\\packages\\log4net\\2.0.17\\log4net.2.0.17.nupkg.sha512",
+    "C:\\Users\\razva\\.nuget\\packages\\microsoft.data.sqlite\\11.0.0-preview.1.26104.118\\microsoft.data.sqlite.11.0.0-preview.1.26104.118.nupkg.sha512",
+    "C:\\Users\\razva\\.nuget\\packages\\microsoft.data.sqlite.core\\11.0.0-preview.1.26104.118\\microsoft.data.sqlite.core.11.0.0-preview.1.26104.118.nupkg.sha512",
+    "C:\\Users\\razva\\.nuget\\packages\\sourcegear.sqlite3\\3.50.4.2\\sourcegear.sqlite3.3.50.4.2.nupkg.sha512",
+    "C:\\Users\\razva\\.nuget\\packages\\sqlitepclraw.bundle_e_sqlite3\\3.0.2\\sqlitepclraw.bundle_e_sqlite3.3.0.2.nupkg.sha512",
+    "C:\\Users\\razva\\.nuget\\packages\\sqlitepclraw.config.e_sqlite3\\3.0.2\\sqlitepclraw.config.e_sqlite3.3.0.2.nupkg.sha512",
+    "C:\\Users\\razva\\.nuget\\packages\\sqlitepclraw.core\\3.0.2\\sqlitepclraw.core.3.0.2.nupkg.sha512",
+    "C:\\Users\\razva\\.nuget\\packages\\sqlitepclraw.provider.e_sqlite3\\3.0.2\\sqlitepclraw.provider.e_sqlite3.3.0.2.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1902",
+      "level": "Warning",
+      "message": "Package 'log4net' 2.0.17 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-4f7c-pmjv-c25w",
+      "projectPath": "C:\\Facultate\\Anul_2\\Semestru_2\\MPP\\C#\\Lab2\\Lab2\\Lab2.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Facultate\\Anul_2\\Semestru_2\\MPP\\C#\\Lab2\\Lab2\\Lab2.csproj",
+      "libraryId": "log4net",
+      "targetGraphs": [
+        "net10.0-windows7.0"
+      ]
+    }
+  ]
+}

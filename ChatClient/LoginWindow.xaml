@@ -1,0 +1,40 @@
+﻿<Window x:Class="Ticketing.Client.Gui.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Login" Height="300" Width="450" 
+        WindowStartupLocation="CenterScreen" Background="#F0F0F0">
+    
+    <Grid>
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="300">
+            <TextBlock Text="MPP Chat Login" 
+                       FontSize="20" 
+                       FontWeight="Bold" 
+                       HorizontalAlignment="Center" 
+                       Margin="0,0,0,20"/>
+
+            <Label Content="Username" Margin="0,5,0,0"/>
+            <TextBox x:Name="TextFieldUsername" 
+                     Height="30" 
+                     VerticalContentAlignment="Center"/>
+
+            <Label Content="Password" Margin="0,10,0,0"/>
+            <PasswordBox x:Name="PasswordField" 
+                         Height="30" 
+                         VerticalContentAlignment="Center"/>
+
+            <StackPanel Orientation="Horizontal" 
+                        HorizontalAlignment="Center" 
+                        Margin="0,25,0,0">
+                <Button Content="Login" 
+                        Width="80" Height="30" Margin="5" 
+                        IsDefault="True"
+                        Click="HandleLogin"/>
+                
+                <Button Content="Cancel" 
+                        Width="80" Height="30" Margin="5" 
+                        IsCancel="True"
+                        Click="HandleCancel"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

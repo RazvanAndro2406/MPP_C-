@@ -1,0 +1,35 @@
+﻿<Window x:Class="ChatClient.ArtistiWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Gestiunea Artistilor" Height="600" Width="800"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Gestiunea Artistilor" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,15">
+            <Label Content="Nume Artist:" VerticalAlignment="Center"/>
+            <TextBox x:Name="TextFieldNume" Width="250" Margin="10,0" VerticalContentAlignment="Center"/>
+            <Button Content="Adauga/Update" Width="100" Margin="5,0" Click="HandleAdauga"/>
+            <Button Content="Sterge" Width="80" Margin="5,0" Click="HandleSterge"/>
+            <Button x:Name="ButtonAdaugaLaSpectacol" Content="Adauga la Spectacol" 
+                    IsEnabled="False" Width="130" Margin="5,0" Click="HandleAdaugaLaSpectacol"/>
+        </StackPanel>
+
+        <DataGrid x:Name="TableArtisti" Grid.Row="2" 
+                  AutoGenerateColumns="False" 
+                  IsReadOnly="True" 
+                  SelectionMode="Single"
+                  SelectionChanged="TableArtisti_SelectionChanged">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="75"/>
+                <DataGridTextColumn Header="Nume" Binding="{Binding Name}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>

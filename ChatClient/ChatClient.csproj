@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net10.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <UseWPF>true</UseWPF>
+        <UseWindowsForms>false</UseWindowsForms>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\model\model.csproj" />
+        <ProjectReference Include="..\services\services.csproj" />
+        <ProjectReference Include="..\ChatNetworking\ChatNetworking.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="log4net" Version="3.3.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="log4net.config">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Resources\chatclient.properties" />
+      <Content Include="Resources\chatclient.properties">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
+</Project>

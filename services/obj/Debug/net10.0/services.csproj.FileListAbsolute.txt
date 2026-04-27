@@ -1,0 +1,15 @@
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\bin\Debug\net10.0\services.deps.json
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\bin\Debug\net10.0\services.dll
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\bin\Debug\net10.0\services.pdb
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\bin\Debug\net10.0\model.dll
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\bin\Debug\net10.0\model.pdb
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\obj\Debug\net10.0\services.csproj.AssemblyReference.cache
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\obj\Debug\net10.0\services.GeneratedMSBuildEditorConfig.editorconfig
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\obj\Debug\net10.0\services.AssemblyInfoInputs.cache
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\obj\Debug\net10.0\services.AssemblyInfo.cs
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\obj\Debug\net10.0\services.csproj.CoreCompileInputs.cache
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\obj\Debug\net10.0\services.csproj.Up2Date
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\obj\Debug\net10.0\services.dll
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\obj\Debug\net10.0\refint\services.dll
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\obj\Debug\net10.0\services.pdb
+C:\Facultate\Anul_2\Semestru_2\MPP\C#\Lab2\services\obj\Debug\net10.0\ref\services.dll

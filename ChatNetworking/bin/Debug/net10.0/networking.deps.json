@@ -1,0 +1,56 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "networking/1.0.0": {
+        "dependencies": {
+          "model": "1.0.0",
+          "services": "1.0.0"
+        },
+        "runtime": {
+          "networking.dll": {}
+        }
+      },
+      "model/1.0.0": {
+        "runtime": {
+          "model.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "services/1.0.0": {
+        "dependencies": {
+          "model": "1.0.0"
+        },
+        "runtime": {
+          "services.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "networking/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "model/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "services/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <WarningsAsErrors></WarningsAsErrors>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\model\model.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
+        <PackageReference Include="Dapper" Version="2.1.72" />
+        <PackageReference Include="log4net" Version="3.3.1" />
+        <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.0" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <WarningsAsErrors></WarningsAsErrors>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\model\model.csproj" />
+        <ProjectReference Include="..\services\services.csproj" />
+        <ProjectReference Include="..\persistence\persistence.csproj" />
+        <ProjectReference Include="..\ChatNetworking\ChatNetworking.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="log4net" Version="3.3.1" />
+        <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="App.config">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+
+        <Content Include="resources\chatserver.properties">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="resources\log4net.config">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="resources\server.properties">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+</Project>
