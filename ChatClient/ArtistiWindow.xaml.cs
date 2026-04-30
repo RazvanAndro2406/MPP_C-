@@ -168,6 +168,8 @@ namespace ChatClient
         }
 
         // REFACTOR: Deadlock prevention on inbound server messages
+        //Inainte era cu Invoke si aveam Deadlock
+        //acum este cu BeginInvoke si e fara deadlock
         public void OnDomainEvent(DomainUiEventBus.EventType type)
         {
             if (type == DomainUiEventBus.EventType.ArtistsChanged)

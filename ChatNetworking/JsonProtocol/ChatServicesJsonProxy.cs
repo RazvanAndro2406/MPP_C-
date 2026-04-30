@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text.Json;
 using System.Threading;
 using ChatNetworking.dto;
+using ChatNetworking.utils;
 using Ticketing.Model.Domain;
 using Ticketing.Networking.Dto;
 
@@ -46,7 +47,12 @@ namespace ChatNetworking.JsonProtocol
             lock (_lock)
             {
                 InitializeConnection();
-                // user.Passwd = TextUtils.SimpleEncode(user.Passwd); // Add your encoding if needed
+                
+                //this was  added for java-C# compatibility
+                //there are chances the plain C# client-server won't work as expacted when putting the password
+                
+                user.Passwd = TextUtils.SimpleEncode(user.Passwd); 
+                
                 Request req = JsonProtocolUtils.CreateLoginRequest(user);
                 Response<object> response = SendRequestAndRead(req);
 
@@ -578,6 +584,10 @@ namespace ChatNetworking.JsonProtocol
         {
             try
             {
+                // Clear any old responses that might be lingering from a previous connection
+                //this was added for java-C# 
+                while (_qresponses.TryTake(out _)) { }
+                
                 _connection = new TcpClient(_host, _port);
                 var stream = _connection.GetStream();
                 _output = new StreamWriter(stream) { AutoFlush = true };

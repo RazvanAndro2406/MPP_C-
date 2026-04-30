@@ -1,4 +1,4 @@
-﻿
+﻿using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Globalization;
@@ -8,7 +8,6 @@ namespace ChatNetworking.JsonProtocol
     public static class GsonFactory
     {
         // Java: private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-        // In C#, ISO 8601 is the default, but we'll specify the format for 1:1 parity.
         private const string DateTimeFormat = "yyyy-MM-ddTHH:mm:ss";
 
         /// <summary>
@@ -19,13 +18,18 @@ namespace ChatNetworking.JsonProtocol
         {
             var options = new JsonSerializerOptions
             {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase, // Standard for JSON
+                // This makes C# properties like 'ArtistName' become 'artistName' in JSON
+                //this was added for java-c#
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase, 
                 WriteIndented = false
             };
 
-            // Java: .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+            // Handles the Java LocalDateTime parsing
             options.Converters.Add(new DateTimeConverter());
-            options.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+            
+            // THE BRIDGE: Converts C#'s 'AddArtist' into Java's 'ADD_ARTIST'
+            options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseUpper)); 
+
             return options;
         }
 
@@ -35,7 +39,6 @@ namespace ChatNetworking.JsonProtocol
         /// </summary>
         private class DateTimeConverter : JsonConverter<DateTime>
         {
-            // The compiler was complaining because it expects 'Utf8JsonReader', not 'JsonReader'
             public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
                 if (reader.TokenType == JsonTokenType.Null)
@@ -43,7 +46,6 @@ namespace ChatNetworking.JsonProtocol
                     return DateTime.MinValue;
                 }
 
-                // Use reader.GetString() to get the ISO string from the JSON stream
                 string? dateStr = reader.GetString();
 
                 if (string.IsNullOrEmpty(dateStr))
@@ -51,10 +53,15 @@ namespace ChatNetworking.JsonProtocol
                     return DateTime.MinValue;
                 }
 
+                //this was included because Java sends time format with millisecond precision
+                if (DateTime.TryParse(dateStr, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime result))
+                {
+                    return result;
+                }
+                
                 return DateTime.ParseExact(dateStr, DateTimeFormat, CultureInfo.InvariantCulture);
             }
 
-            // Ensure the Write method uses 'Utf8JsonWriter'
             public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
             {
                 writer.WriteStringValue(value.ToString(DateTimeFormat));
